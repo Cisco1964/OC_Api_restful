@@ -255,7 +255,7 @@ class ContributorsView(ModelViewSet):
         serializer = ContributorsSerializer(instance, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    ''' 8- Créer un nouveau contributeur'''
+    ''' 8- Ajouter un nouveau contributeur à un projet'''
     def create(self, request, pk=None, *args, **kwargs):
         project = get_object_or_404(Projects, id=kwargs['pk1'])
         try:
@@ -285,7 +285,7 @@ class ContributorsView(ModelViewSet):
         request.POST['user_id'] = user.id
         serializer = ContributorsSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(role='contributeur', permission='restricted')
+            serializer.save(project_id=project, role='contributeur', permission='restricted')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
