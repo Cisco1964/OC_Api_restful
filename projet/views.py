@@ -128,13 +128,19 @@ class IssuesView(ModelViewSet):
         request.POST._mutable = True
         request.POST['assignee_user_id'] = assignee.id
         serializer = IssuesSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(author_user_id=user, project_id=project)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
+        if Contributors.objects.filter(user_id=assignee.id).filter(project_id=project).exists():
+            if serializer.is_valid():
+                serializer.save(author_user_id=user, project_id=project)
+                return Response(serializer.data,
+                                status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors,
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                    'status': 'Incorrect',
+                    'message': "l'assignee saisi n'est pas un contributeur du projet"
+                }, status=status.HTTP_200_OK)
 
     ''' 13-Mise à jour d'un problème dans un projet'''
     def update(self, request, pk=None, *args, **kwargs):
